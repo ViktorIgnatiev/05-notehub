@@ -1,76 +1,95 @@
 .list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
+    list-style: none;
     padding: 0;
     margin: 0;
-    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
 }
 
 .listItem {
-    background-color: #ffffff;
-    border: 1px solid #dee2e6;
+    border: 1px solid #e0e0e0;
     border-radius: 8px;
     padding: 16px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 180px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background-color: white;
+}
+
+.listItem:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .title {
+    margin: 0 0 8px 0;
+    color: #333;
     font-size: 18px;
     font-weight: 600;
-    margin: 0 0 8px 0;
-    color: #212529;
 }
 
 .content {
-    margin: 0;
-    flex-grow: 1;
+    margin: 0 0 12px 0;
+    color: #666;
     font-size: 14px;
-    color: #495057;
-    margin-bottom: 12px;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.button {
-    align-self: flex-end;
-    padding: 6px 12px;
-    font-size: 14px;
-    color: #fff;
-    background-color: #dc3545;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.button:hover {
-    background-color: #bb2d3b;
+    line-height: 1.4;
 }
 
 .footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: auto;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
 }
 
 .tag {
     display: inline-block;
     padding: 4px 8px;
+    border-radius: 4px;
     font-size: 12px;
-    color: #0d6efd;
-    background-color: #e7f1ff;
-    border: 1px solid #b6d4fe;
-    border-radius: 12px;
-    max-width: 100px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-weight: 500;
+    background-color: #f0f0f0;
+    color: #555;
+}
+
+.button {
+    padding: 6px 12px;
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.button:hover {
+    background-color: #cc0000;
+}
+
+.button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Стилі для різних тегів */
+.tag[data-tag="Work"] {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.tag[data-tag="Personal"] {
+    background-color: #e8f5e9;
+    color: #388e3c;
+}
+
+.tag[data-tag="Shopping"] {
+    background-color: #fff3e0;
+    color: #ffa000;
+}
+
+.tag[data-tag="Todo"] {
+    background-color: #f3e5f5;
+    color: #8e24aa;
 }

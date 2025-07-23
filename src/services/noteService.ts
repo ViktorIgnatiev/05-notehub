@@ -1,22 +1,33 @@
-import axios, { AxiosResponse } from 'axios';
-import { Note, NoteTag, PaginationInfo } from '../types/note';
+import axios from "axios";
+import type { Note, NoteTag } from "../types/note";
 
-const API_BASE_URL = 'https://notehub-public.goit.study/api';
 
-// Отримання токену з змінних оточення
-const NOTEHUB_TOKEN = import.meta.env.VITE_NOTEHUB_TOKEN;
+axios.defaults.baseURL = "https://notehub-public.goit.study/api";
+const token = import.meta.env.VITE_NOTEHUB_TOKEN;
+axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-if (!NOTEHUB_TOKEN) {
-  console.error('VITE_NOTEHUB_TOKEN is not defined. Please set your NoteHub API token in your .env file.');
-}
 
-const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${NOTEHUB_TOKEN}`,
-  },
+if (!token) {
+  throw new Error('VITE_NOTEHUB_TOKEN is not defined. Please check your .env configuration.');
+};
+
+
+axios.interceptors.request.use(config => {
+  console.log('Making request to:', config.url);
+  return config;
 });
+
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    console.error('API Error:', {
+      status: error.response?.status,
+      message: error.message,
+      url: error.config?.url
+    });
+    return Promise.reject(error);
+  }
+);
 
 export interface FetchNotesParams {
   page?: number;
@@ -25,69 +36,48 @@ export interface FetchNotesParams {
 }
 
 export interface FetchNotesResponse {
+  page: number;
+  data: Note[];
+  total_pages: number;
+  perPage: number;
+}
+
+interface RawFetchNotesResponse {
   notes: Note[];
-  pagination: PaginationInfo;
+  totalPages: number;
 }
 
 export const fetchNotes = async ({
   page = 1,
   perPage = 12,
-  search = '',
+  search
 }: FetchNotesParams): Promise<FetchNotesResponse> => {
-  try {
-    const response: AxiosResponse<FetchNotesResponse> = await axiosInstance.get('/notes', {
-      params: {
-        page,
-        perPage,
-        ...(search && { search }), // Додаємо search тільки якщо він є
-      },
-    });
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error fetching notes:', error.response?.data || error.message);
-    } else {
-      console.error('An unexpected error occurred:', error);
-    }
-    throw error;
-  }
+  const response = await axios.get<RawFetchNotesResponse>('/notes', {
+    params: {
+      page,
+      perPage,
+      ...(search && { search }), 
+    },
+  });
+
+  return {
+    page,
+    perPage,
+    data: response.data.notes,
+    total_pages: response.data.totalPages,
+  };
 };
 
-export interface CreateNoteParams {
+export const createNote = async (note: {
   title: string;
   content: string;
-  tags: NoteTag[];
-}
-
-export const createNote = async (noteData: CreateNoteParams): Promise<Note> => {
-  try {
-    const response: AxiosResponse<Note> = await axiosInstance.post('/notes', noteData);
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error creating note:', error.response?.data || error.message);
-    } else {
-      console.error('An unexpected error occurred:', error);
-    }
-    throw error;
-  }
+  tag: NoteTag;
+}): Promise<Note> => {
+  const response = await axios.post<Note>('/notes', note);
+  return response.data;
 };
 
-export interface DeleteNoteResponse {
-  message: string;
-  deletedId: string;
-}
-
-export const deleteNote = async (id: string): Promise<DeleteNoteResponse> => {
-  try {
-    const response: AxiosResponse<DeleteNoteResponse> = await axiosInstance.delete(`/notes/${id}`);
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error deleting note:', error.response?.data || error.message);
-    } else {
-      console.error('An unexpected error occurred:', error);
-    }
-    throw error;
-  }
+export const deleteNote = async (id: string): Promise<Note> => {
+  const response = await axios.delete<Note>(`/notes/${id}`);
+  return response.data;
 };

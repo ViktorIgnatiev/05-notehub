@@ -1,26 +1,20 @@
-import React, { useCallback } from 'react';
-import css from './SearchBox.module.css'; // Імпорт CSS-модуля
+import css from './SearchBox.module.css';
 
 interface SearchBoxProps {
-  searchTerm: string;
-  onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  value: string;
+  onChange: (value: string) => void;
 }
 
-function SearchBox({ searchTerm, onSearchChange }: SearchBoxProps) {
-  // Використовуємо useCallback для оптимізації, щоб функція не створювалася на кожному рендері
-  const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    onSearchChange(event);
-  }, [onSearchChange]);
-
+const SearchBox = ({ value, onChange }: SearchBoxProps) => {
   return (
     <input
       className={css.input}
       type="text"
       placeholder="Search notes"
-      value={searchTerm}
-      onChange={handleChange}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
     />
   );
-}
+};
 
 export default SearchBox;

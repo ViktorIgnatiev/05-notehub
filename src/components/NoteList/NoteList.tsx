@@ -1,51 +1,55 @@
-import React, { useCallback } from 'react';
-import css from './NoteList.module.css'; // Імпорт CSS-модуля
-import { Note } from '../../types/note';
-import { useMutation } from '@tanstack/react-query';
-import { deleteNote } from '../../services/noteService';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchNotes, deleteNote } from '../../services/noteService';
+import css from './NoteList.module.css';
 
 interface NoteListProps {
-  notes: Note[];
-  onNoteDeleted: () => void;
+  searchTerm: string;
+  page: number;
 }
 
-function NoteList({ notes, onNoteDeleted }: NoteListProps) {
+const NoteList = ({ searchTerm, page }: NoteListProps) => {
+  const queryClient = useQueryClient();
+  
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['notes', page, searchTerm],
+    queryFn: () => fetchNotes({ page, perPage: 12, search: searchTerm }),
+  });
+
   const deleteMutation = useMutation({
     mutationFn: deleteNote,
     onSuccess: () => {
-      onNoteDeleted(); // Сповіщаємо батьківський компонент про видалення для оновлення даних
-      alert('Нотатка успішно видалена!'); // Просте повідомлення
-    },
-    onError: (error) => {
-      console.error('Помилка видалення нотатки:', error);
-      alert(`Помилка видалення нотатки: ${error.message}`);
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
     },
   });
 
-  const handleDelete = useCallback((id: string) => {
-    if (window.confirm('Ви впевнені, що хочете видалити цю нотатку?')) {
-      deleteMutation.mutate(id);
-    }
-  }, [deleteMutation]);
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id);
+  };
+
+  if (isLoading) return <div className={css.loading}>Loading...</div>;
+  if (isError) return <div className={css.error}>Error fetching notes</div>;
+  if (!data?.data.length) return <div className={css.empty}>No notes found</div>;
 
   return (
     <ul className={css.list}>
-      {notes.map((note) => (
-        <li key={note._id} className={css.listItem}>
+      {data.data.map((note) => (
+        <li key={note.id} className={css.listItem}>
           <h2 className={css.title}>{note.title}</h2>
           <p className={css.content}>{note.content}</p>
           <div className={css.footer}>
-            {note.tags && note.tags.length > 0 && (
-              <span className={css.tag}>{note.tags[0]}</span> // Припускаємо, що тег завжди один
-            )}
-            <button onClick={() => handleDelete(note._id)} className={css.button}>
-              Delete
+            <span className={css.tag}>{note.tag}</span>
+            <button 
+              className={css.button}
+              onClick={() => handleDelete(note.id)}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
             </button>
           </div>
         </li>
       ))}
     </ul>
   );
-}
+};
 
 export default NoteList;

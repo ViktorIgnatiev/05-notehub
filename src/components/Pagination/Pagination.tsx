@@ -1,39 +1,27 @@
-import React, { useCallback } from 'react';
 import ReactPaginate from 'react-paginate';
-import css from './Pagination.module.css'; // Імпорт CSS-модуля
+import css from './Pagination.module.css';
 
 interface PaginationProps {
-  pageCount: number;
-  currentPage: number; // 0-based index
-  onPageChange: (selectedItem: { selected: number }) => void;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (selectedPage: number) => void;
 }
 
-function Pagination({ pageCount, currentPage, onPageChange }: PaginationProps) {
-  // useCallback для оптимізації, хоча ReactPaginate сам оптимізований
-  const handlePageClick = useCallback((event: { selected: number }) => {
-    onPageChange(event);
-  }, [onPageChange]);
-
+const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
   return (
     <ReactPaginate
-      breakLabel="..."
-      nextLabel=">"
-      onPageChange={handlePageClick}
-      pageRangeDisplayed={3} // Кількість сторінок, які відображаються навколо поточної
-      marginPagesDisplayed={1} // Кількість сторінок, які відображаються на початку та в кінці
-      pageCount={pageCount}
+      pageCount={totalPages}
+      forcePage={currentPage - 1}
+      onPageChange={({ selected }) => onPageChange(selected + 1)}
+      containerClassName={css.pagination}
+      activeClassName={css.active}
       previousLabel="<"
-      renderOnZeroPageCount={null}
-      forcePage={currentPage} // Примусово встановлює поточну сторінку
-      className={css.pagination} // Застосування стилів до контейнера пагінації
-      pageLinkClassName={css.pageLink}
-      activeLinkClassName={css.activePageLink}
-      previousLinkClassName={css.prevLink}
-      nextLinkClassName={css.nextLink}
-      disabledLinkClassName={css.disabledLink}
-      breakLinkClassName={css.breakLink}
+      nextLabel=">"
+      breakLabel="..."
+      marginPagesDisplayed={1}
+      pageRangeDisplayed={3}
     />
   );
-}
+};
 
 export default Pagination;

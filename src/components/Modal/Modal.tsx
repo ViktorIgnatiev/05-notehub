@@ -1,48 +1,36 @@
-import React, { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import css from './Modal.module.css'; // Імпорт CSS-модуля
+import css from './Modal.module.css';
 
 interface ModalProps {
   children: React.ReactNode;
   onClose: () => void;
 }
 
-const modalRoot = document.getElementById('modal-root'); // Потрібно додати div#modal-root до index.html
-
-if (!modalRoot) {
-  const el = document.createElement('div');
-  el.setAttribute('id', 'modal-root');
-  document.body.appendChild(el);
-}
-
-function Modal({ children, onClose }: ModalProps) {
-  const handleBackdropClick = useCallback((event: React.MouseEvent) => {
-    if (event.target === event.currentTarget) {
-      onClose();
-    }
-  }, [onClose]);
-
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
-      onClose();
-    }
-  }, [onClose]);
-
+const Modal = ({ children, onClose }: ModalProps) => {
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Escape') {
+        onClose();
+      }
     };
-  }, [handleKeyDown]);
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
 
   return createPortal(
-    <div className={css.backdrop} role="dialog" aria-modal="true" onClick={handleBackdropClick}>
-      <div className={css.modal}>
-        {children}
-      </div>
+    <div className={css.backdrop} onClick={handleBackdropClick} role="dialog" aria-modal="true">
+      <div className={css.modal}>{children}</div>
     </div>,
-    document.getElementById('modal-root')!
+    document.body
   );
-}
+};
 
 export default Modal;
