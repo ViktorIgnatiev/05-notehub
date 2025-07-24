@@ -1,12 +1,11 @@
 import axios from "axios";
 import type { Note, NoteTag } from "../types/note";
 
-
 const API_BASE_URL = 'https://notehub-public.goit.study/api';
 const token = import.meta.env.VITE_NOTEHUB_TOKEN;
 
 if (!token) {
-  console.error('VITE_NOTEHUB_TOKEN is not defined. Please set your NoteHub API token in your .env file.');
+  // console.error('VITE_NOTEHUB_TOKEN is not defined. Please set your NoteHub API token in your .env file.');
   throw new Error('VITE_NOTEHUB_TOKEN is not defined. Please check your .env configuration.');
 }
 
@@ -14,7 +13,7 @@ axios.defaults.baseURL = API_BASE_URL;
 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
 axios.interceptors.request.use(config => {
-  console.log('Making request to:', config.url);
+  // console.log('Making request to:', config.url);
   return config;
 });
 
@@ -25,12 +24,11 @@ axios.interceptors.response.use(
       status: error.response?.status,
       message: error.message,
       url: error.config?.url,
-      data: error.response?.data, 
+      data: error.response?.data,
     });
     return Promise.reject(error);
   }
 );
-
 
 export interface FetchNotesParams {
   page?: number;
@@ -41,15 +39,15 @@ export interface FetchNotesParams {
 export interface FetchNotesResponse {
   page: number;
   data: Note[];
-  totalPages: number; 
+  totalPages: number;
   perPage: number;
-  total: number; 
+  total: number;
 }
 
 interface RawFetchNotesResponse {
   notes: Note[];
   totalPages: number;
-  total: number; 
+  total: number;
 }
 
 export const fetchNotes = async ({
@@ -85,12 +83,10 @@ export interface CreateNoteParams {
   tag: NoteTag;
 }
 
-
 export const createNote = async (noteData: CreateNoteParams): Promise<Note> => {
   const response = await axios.post<Note>('/notes', noteData);
   return response.data;
 };
-
 
 export const deleteNote = async (id: string): Promise<Note> => {
   const response = await axios.delete<Note>(`/notes/${id}`);

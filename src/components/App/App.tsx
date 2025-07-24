@@ -24,10 +24,10 @@ const App = () => {
     isError,
     error,
     refetch,
-  } = useQuery<FetchNotesResponse, Error>({
+  } = useQuery<FetchNotesResponse, Error, FetchNotesResponse, (string | number)[]>({
     queryKey: ['notes', page, debouncedSearchTerm],
     queryFn: () => fetchNotes({ page, perPage: 12, search: debouncedSearchTerm }),
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 
   const handleCreateNote = useCallback((): void => {
@@ -68,8 +68,8 @@ const App = () => {
     );
   }
 
-  const hasNotes: boolean = data?.data && data.data.length > 0;
-  const totalPages: number = data?.totalPages || 1;
+  const hasNotes: boolean = !!data?.data?.length;
+  const totalPages: number = data?.totalPages ?? 1;
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -90,7 +90,7 @@ const App = () => {
 
         <main className={css.main}>
           {hasNotes ? (
-            <NoteList notes={data.data || []} onNoteDeleted={refetch} />
+            <NoteList notes={data!.data || []} onNoteDeleted={refetch} />
           ) : (
             <p>Немає нотаток. Створіть свою першу нотатку!</p>
           )}
