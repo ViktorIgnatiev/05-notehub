@@ -8,7 +8,7 @@ import SearchBox from '../SearchBox/SearchBox';
 import Pagination from '../Pagination/Pagination';
 import Modal from '../Modal/Modal';
 import NoteForm from '../NoteForm/NoteForm';
-import { fetchNotes, FetchNotesResponse } from '../../services/noteService'; 
+import { fetchNotes, type FetchNotesResponse } from '../../services/noteService';
 
 const queryClient = new QueryClient();
 
@@ -23,11 +23,11 @@ const App = () => {
     isLoading,
     isError,
     error,
-    refetch, 
+    refetch,
   } = useQuery<FetchNotesResponse, Error>({
-    queryKey: ['notes', page, debouncedSearchTerm], 
-    queryFn: () => fetchNotes({ page, perPage: 12, search: debouncedSearchTerm }), 
-    keepPreviousData: true, 
+    queryKey: ['notes', page, debouncedSearchTerm],
+    queryFn: () => fetchNotes({ page, perPage: 12, search: debouncedSearchTerm }),
+    keepPreviousData: true,
   });
 
   const handleCreateNote = useCallback((): void => {
@@ -36,12 +36,12 @@ const App = () => {
 
   const handleCloseModal = useCallback((): void => {
     setIsModalOpen(false);
-    refetch(); 
+    refetch();
   }, [refetch]);
 
   const handleSearchChange = useCallback((value: string): void => {
     setSearchTerm(value);
-    setPage(1); 
+    setPage(1);
   }, []);
 
   const handlePageChange = useCallback((selectedPage: number): void => {
@@ -68,7 +68,7 @@ const App = () => {
     );
   }
 
-  const hasNotes: boolean = data && data.data.length > 0;
+  const hasNotes: boolean = data?.data && data.data.length > 0;
   const totalPages: number = data?.totalPages || 1;
 
   return (
@@ -89,8 +89,8 @@ const App = () => {
         </header>
 
         <main className={css.main}>
-                 {hasNotes ? (
-            <NoteList notes={data.data} onNoteDeleted={refetch} />
+          {hasNotes ? (
+            <NoteList notes={data.data || []} onNoteDeleted={refetch} />
           ) : (
             <p>Немає нотаток. Створіть свою першу нотатку!</p>
           )}
@@ -98,7 +98,7 @@ const App = () => {
 
         {isModalOpen && (
           <Modal onClose={handleCloseModal}>
-            <NoteForm onSuccess={handleCloseModal} /> 
+            <NoteForm onSuccess={handleCloseModal} />
           </Modal>
         )}
       </div>

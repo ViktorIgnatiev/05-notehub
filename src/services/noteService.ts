@@ -1,6 +1,7 @@
 import axios from "axios";
 import type { Note, NoteTag } from "../types/note";
 
+
 const API_BASE_URL = 'https://notehub-public.goit.study/api';
 const token = import.meta.env.VITE_NOTEHUB_TOKEN;
 
@@ -30,6 +31,7 @@ axios.interceptors.response.use(
   }
 );
 
+
 export interface FetchNotesParams {
   page?: number;
   perPage?: number;
@@ -49,7 +51,6 @@ interface RawFetchNotesResponse {
   totalPages: number;
   total: number; 
 }
-
 
 export const fetchNotes = async ({
   page = 1,

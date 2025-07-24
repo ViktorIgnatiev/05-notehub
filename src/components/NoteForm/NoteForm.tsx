@@ -1,33 +1,40 @@
+// src/components/NoteForm/NoteForm.tsx
+// import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import type { NoteTag } from '../../types/note';
-import { createNote, CreateNoteParams } from '../../services/noteService';
+// ВИПРАВЛЕНО: Використання 'type' для імпорту типів
+import type { NoteTag, Note } from '../../types/note'; // Додано імпорт Note
+// ВИПРАВЛЕНО: Використання 'type' для імпорту типів
+import { createNote, type CreateNoteParams } from '../../services/noteService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import css from './NoteForm.module.css';
 
+// Інтерфейс для пропсів компонента NoteForm
 interface NoteFormProps {
-  onSuccess: () => void; 
+  onSuccess: () => void; // Колбек для відправки даних форми
 }
 
+// Схема валідації за допомогою Yup
 const validationSchema = Yup.object().shape({
   title: Yup.string()
     .min(3, 'Title must be at least 3 characters')
     .max(50, 'Title must be at most 50 characters')
     .required('Title is required'),
   content: Yup.string().max(500, 'Content must be at most 500 characters'),
+  // Валідація тегів: перевіряємо, що значення є одним з дозволених NoteTag
   tag: Yup.string()
-    .oneOf<NoteTag>(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'], 'Invalid tag selected') 
+    .oneOf<NoteTag>(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'], 'Invalid tag selected') // Явно вказуємо тип для oneOf
     .required('Tag is required'),
 });
 
 const NoteForm = ({ onSuccess }: NoteFormProps) => {
   const queryClient = useQueryClient();
 
-  const createMutation = useMutation<Note, Error, CreateNoteParams>({
+  const createMutation = useMutation<Note, Error, CreateNoteParams>({ // Типізуємо мутацію
     mutationFn: createNote,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] }); 
-      onSuccess();
+      queryClient.invalidateQueries({ queryKey: ['notes'] }); // Інвалідуємо кеш
+      onSuccess(); // Викликаємо колбек успіху
       console.log('Нотатка успішно створена!');
     },
     onError: (error: Error) => {
@@ -39,7 +46,7 @@ const NoteForm = ({ onSuccess }: NoteFormProps) => {
   const initialValues: CreateNoteParams = {
     title: '',
     content: '',
-    tag: 'Todo',
+    tag: 'Todo', // Початкове значення для select
   };
 
   const handleSubmit = async (values: CreateNoteParams): Promise<void> => {

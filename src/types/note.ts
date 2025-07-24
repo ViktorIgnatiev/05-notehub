@@ -1,5 +1,4 @@
 export interface Note {
-
   id: number;
   title: string;
   content: string;
@@ -7,7 +6,6 @@ export interface Note {
   createdAt: string;
   updatedAt: string;
 }
-
 
 export type NoteTag = 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping';
 
