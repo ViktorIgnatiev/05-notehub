@@ -12,22 +12,22 @@ interface NoteListProps {
 const NoteList = ({ notes, onNoteDeleted }: NoteListProps) => {
   const queryClient = useQueryClient();
 
-  const deleteMutation = useMutation<Note, Error, string>({
+  const deleteMutation = useMutation<void, Error, number>({
     mutationFn: deleteNote,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes'] });
       onNoteDeleted();
-      // console.log('Нотатка успішно видалена!');
+      console.log('Нотатка успішно видалена!');
     },
     onError: (mutationError: Error) => {
-      // console.error('Помилка видалення нотатки:', mutationError);
+      console.error('Помилка видалення нотатки:', mutationError);
       alert(`Помилка видалення: ${mutationError.message}`);
     },
   });
 
   const handleDelete = useCallback((id: number): void => {
     if (window.confirm('Ви впевнені, що хочете видалити цю нотатку?')) {
-      deleteMutation.mutate(String(id));
+      deleteMutation.mutate(id);
     }
   }, [deleteMutation]);
 

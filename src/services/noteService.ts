@@ -5,7 +5,7 @@ const API_BASE_URL = 'https://notehub-public.goit.study/api';
 const token = import.meta.env.VITE_NOTEHUB_TOKEN;
 
 if (!token) {
-  // console.error('VITE_NOTEHUB_TOKEN is not defined. Please set your NoteHub API token in your .env file.');
+  console.error('VITE_NOTEHUB_TOKEN is not defined. Please set your NoteHub API token in your .env file.');
   throw new Error('VITE_NOTEHUB_TOKEN is not defined. Please check your .env configuration.');
 }
 
@@ -13,7 +13,7 @@ axios.defaults.baseURL = API_BASE_URL;
 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
 axios.interceptors.request.use(config => {
-  // console.log('Making request to:', config.url);
+  console.log('Making request to:', config.url);
   return config;
 });
 
@@ -88,7 +88,6 @@ export const createNote = async (noteData: CreateNoteParams): Promise<Note> => {
   return response.data;
 };
 
-export const deleteNote = async (id: string): Promise<Note> => {
-  const response = await axios.delete<Note>(`/notes/${id}`);
-  return response.data;
+export const deleteNote = async (id: number): Promise<void> => {
+  await axios.delete<void>(`${API_BASE_URL}/notes/${id}`);
 };
