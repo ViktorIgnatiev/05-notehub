@@ -1,43 +1,48 @@
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import type { NoteTag } from '../../types/note';
-import { createNote } from '../../services/noteService';
+import { createNote, CreateNoteParams } from '../../services/noteService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import css from './NoteForm.module.css';
 
 interface NoteFormProps {
-  onSuccess: () => void;
+  onSuccess: () => void; 
 }
 
-const validationSchema = Yup.object({
+const validationSchema = Yup.object().shape({
   title: Yup.string()
     .min(3, 'Title must be at least 3 characters')
     .max(50, 'Title must be at most 50 characters')
     .required('Title is required'),
   content: Yup.string().max(500, 'Content must be at most 500 characters'),
   tag: Yup.string()
-    .oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'])
+    .oneOf<NoteTag>(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'], 'Invalid tag selected') 
     .required('Tag is required'),
 });
 
 const NoteForm = ({ onSuccess }: NoteFormProps) => {
   const queryClient = useQueryClient();
-  
-  const createMutation = useMutation({
+
+  const createMutation = useMutation<Note, Error, CreateNoteParams>({
     mutationFn: createNote,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
+      queryClient.invalidateQueries({ queryKey: ['notes'] }); 
       onSuccess();
+      console.log('Нотатка успішно створена!');
+    },
+    onError: (error: Error) => {
+      console.error('Помилка створення нотатки:', error);
+      alert(`Помилка створення: ${error.message}`);
     },
   });
 
-  const initialValues = {
+  const initialValues: CreateNoteParams = {
     title: '',
     content: '',
-    tag: 'Todo' as NoteTag,
+    tag: 'Todo',
   };
 
-  const handleSubmit = async (values: typeof initialValues) => {
+  const handleSubmit = async (values: CreateNoteParams): Promise<void> => {
     createMutation.mutate(values);
   };
 
